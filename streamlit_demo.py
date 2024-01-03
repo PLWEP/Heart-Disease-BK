@@ -55,20 +55,6 @@ def main():
     oldpeak = st.slider(
         'ST Depression Induced by Exercise Relative to Rest', 0.0, 6.2, 1.0)
 
-    # Feature 10
-    slope_options = ['Upsloping', 'Flat', 'Downsloping']
-    slope = st.selectbox(
-        'Slope of the Peak Exercise ST Segment', slope_options)
-    slope_num = slope_options.index(slope)
-
-    # Feature 10
-    ca = st.slider('Number of Major Vessels Colored by Fluoroscopy', 0, 3, 1)
-
-    # Feature 11
-    thal_options = ['Normal', 'Fixed Defect', 'Reversible Defect']
-    thal = st.selectbox('Thalassemia', thal_options)
-    thal_num = thal_options.index(thal)
-
     if st.button('Predict'):
         user_input = pd.DataFrame(data={
             'age': [age],
@@ -81,24 +67,23 @@ def main():
             'thalach': [thalach],
             'exang': [exang_num],
             'oldpeak': [oldpeak],
-            'slope': [slope_num],
-            'ca': [ca],
-            'thal': [thal_num]
         })
         prediction = model.predict(user_input.values)
         prediction_proba = model.predict_proba(user_input.values)
 
-        if prediction[0] == 1:
+        print(prediction)
+        print(prediction_proba)
+
+        prediction_result = prediction[0]
+        confidence = prediction_proba[0][int(prediction_result)] * 100
+
+        if confidence < 50:
             bg_color = 'red'
-            prediction_result = 'Positive'
         else:
             bg_color = 'green'
-            prediction_result = 'Negative'
-
-        confidence = prediction_proba[0][1] if prediction[0] == 1 else prediction_proba[0][0]
 
         st.markdown(
-            f"<p style='background-color:{bg_color}; color:white; padding:10px;'>Prediction: {prediction_result}<br>Confidence: {((confidence*10000)//1)/100}%</p>", unsafe_allow_html=True)
+            f"<p style='background-color:{bg_color}; color:white; padding:10px;'>Prediction: {prediction_result}<br>Confidence: {confidence}%</p>", unsafe_allow_html=True)
 
 
 if __name__ == '__main__':
