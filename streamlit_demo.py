@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import pickle
+from sklearn.preprocessing import MinMaxScaler
 
 model_filename = 'best_model.pkl'
 
@@ -68,19 +69,22 @@ def main():
             'exang': [exang_num],
             'oldpeak': [oldpeak],
         })
-        prediction = model.predict(user_input.values)
-        prediction_proba = model.predict_proba(user_input.values)
 
-        print(prediction)
-        print(prediction_proba)
+        scaler = MinMaxScaler()
+        X = scaler.fit_transform(user_input)
+
+        prediction = model.predict(X)
+        prediction_proba = model.predict_proba(X)
 
         prediction_result = prediction[0]
         confidence = prediction_proba[0][int(prediction_result)] * 100
 
-        if confidence < 50:
+        if prediction_result == 0:
+            bg_color = 'green'
+        elif prediction_result == 4:
             bg_color = 'red'
         else:
-            bg_color = 'green'
+            bg_color = 'orange'
 
         st.markdown(
             f"<p style='background-color:{bg_color}; color:white; padding:10px;'>Prediction: {prediction_result}<br>Confidence: {confidence}%</p>", unsafe_allow_html=True)
